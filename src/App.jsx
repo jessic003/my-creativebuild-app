@@ -151,7 +151,7 @@ export default function Dashboard() {
   const canSend = (input.trim() || attachments.length > 0) && !loading;
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100vh", background: "#0f1117", fontFamily: "ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", color: "#e2e8f0", overflow: "hidden" }}>
+    <div style={{ display: "flex", flexDirection: "column", width: "100vw", maxWidth: "100vw", height: "100vh", background: "#0f1117", fontFamily: "ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", color: "#e2e8f0", overflow: "hidden", boxSizing: "border-box" }}>
 
       {/* ── Top Bar ── */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 20px", height: "52px", borderBottom: "1px solid #1e2433", background: "#0a0d13", flexShrink: 0 }}>
@@ -177,7 +177,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
+      <div style={{ display: "flex", flex: 1, width: "100%", minWidth: 0, overflow: "hidden" }}>
 
         {/* ── Left Sidebar ── */}
         <div style={{ width: "200px", borderRight: "1px solid #1e2433", display: "flex", flexDirection: "column", flexShrink: 0, background: "#0a0d13" }}>
@@ -330,7 +330,7 @@ export default function Dashboard() {
 
         {/* ── Right Preview Panel ── */}
         {showPreview && (
-          <div style={{ width: "400px", borderLeft: "1px solid #1e2433", display: "flex", flexDirection: "column", flexShrink: 0, background: "#0a0d13" }}>
+          <div style={{ flex: "0 0 400px", width: "400px", minWidth: 0, borderLeft: "1px solid #1e2433", display: "flex", flexDirection: "column", overflow: "hidden", background: "#0a0d13" }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 14px", height: "44px", borderBottom: "1px solid #1e2433", flexShrink: 0 }}>
               <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "12px", fontWeight: "600", color: "#7a8a9a", letterSpacing: "0.02em" }}>
                 <div style={{ width: "7px", height: "7px", borderRadius: "50%", background: "#22c55e", boxShadow: "0 0 5px rgba(34,197,94,0.55)", flexShrink: 0 }} />
@@ -369,7 +369,7 @@ export default function Dashboard() {
           50% { opacity: 1; transform: scale(1); }
         }
         *, *::before, *::after { box-sizing: border-box; }
-        html, body, #root { margin: 0; padding: 0; height: 100%; overflow: hidden; }
+        html, body, #root { margin: 0; padding: 0; width: 100%; max-width: 100vw; height: 100%; overflow: hidden; box-sizing: border-box; }
         ::-webkit-scrollbar { width: 4px; height: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #1e2433; border-radius: 2px; }
