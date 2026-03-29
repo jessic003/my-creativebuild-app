@@ -124,15 +124,20 @@ export default function Dashboard() {
 
     try {
       const apiMessages = newMessages.map(m => ({ role: m.role, content: m.content }));
+      const body = JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 1024, system: SYSTEM_PROMPT, messages: apiMessages });
+      console.log("Sending to proxy:", PROXY_URL);
       const response = await fetch(PROXY_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 4096, system: SYSTEM_PROMPT, messages: apiMessages })
+        body
       });
+      console.log("Response status:", response.status);
       const data = await response.json();
-      const reply = data.content?.[0]?.text || "Sorry, something went wrong. Please try again.";
+      console.log("Response data:", data);
+      const reply = data.content?.[0]?.text || data.error?.message || "Sorry, something went wrong. Please try again.";
       setMessages(prev => [...prev, { role: "assistant", content: reply }]);
-    } catch {
+    } catch (err) {
+      console.error("Fetch error:", err);
       setMessages(prev => [...prev, { role: "assistant", content: "Connection error. Please try again." }]);
     }
     setLoading(false);
@@ -180,7 +185,7 @@ export default function Dashboard() {
       <div style={{ display: "flex", flex: 1, width: "100%", minWidth: 0, overflow: "hidden" }}>
 
         {/* ── Left Sidebar ── */}
-        <div style={{ width: "200px", borderRight: "1px solid #1e2433", display: "flex", flexDirection: "column", flexShrink: 0, background: "#0a0d13" }}>
+        <div style={{ width: "180px", flexShrink: 0, borderRight: "1px solid #1e2433", display: "flex", flexDirection: "column", background: "#0a0d13" }}>
 
           <div style={{ padding: "12px 10px 10px" }}>
             <button onClick={newChat}
@@ -240,7 +245,7 @@ export default function Dashboard() {
         </div>
 
         {/* ── Middle Chat Panel ── */}
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", background: "#0f1117", minWidth: 0 }}>
+        <div style={{ width: "380px", flexShrink: 0, display: "flex", flexDirection: "column", overflow: "hidden", background: "#0f1117" }}>
 
           <div style={{ flex: 1, overflowY: "auto", padding: "20px 20px 8px", display: "flex", flexDirection: "column", gap: "18px" }}>
             {messages.map((msg, i) => (
@@ -278,22 +283,26 @@ export default function Dashboard() {
 
           {/* Attachment previews */}
           {attachments.length > 0 && (
-            <div style={{ padding: "8px 20px 0", display: "flex", gap: "8px", flexWrap: "wrap" }}>
-              {attachments.map((att, i) => (
-                <div key={i} style={{ position: "relative" }}>
-                  {att.type.startsWith("image/")
-                    ? <img src={att.dataUrl} alt={att.name} style={{ width: "58px", height: "58px", objectFit: "cover", borderRadius: "8px", border: "1px solid #2d3748", display: "block" }} />
-                    : <div style={{ width: "58px", height: "58px", borderRadius: "8px", border: "1px solid #2d3748", background: "#1a1f2e", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "2px" }}>
-                        <span style={{ fontSize: "20px" }}>📄</span>
-                        <span style={{ fontSize: "9px", color: "#64748b", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", width: "52px", textAlign: "center" }}>{att.name.split(".").pop().toUpperCase()}</span>
-                      </div>
-                  }
-                  <button onClick={() => setAttachments(prev => prev.filter((_, j) => j !== i))}
-                    style={{ position: "absolute", top: "-5px", right: "-5px", width: "16px", height: "16px", borderRadius: "50%", background: "#ef4444", border: "none", cursor: "pointer", color: "#fff", fontSize: "10px", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "800", lineHeight: 1 }}>
-                    ×
-                  </button>
-                </div>
-              ))}
+            <div style={{ padding: "8px 20px 4px", borderTop: "1px solid #1e2433", background: "#0a0d13", display: "flex", flexDirection: "column", gap: "6px" }}>
+              <div style={{ fontSize: "10px", color: "#475569", fontWeight: "600", textTransform: "uppercase", letterSpacing: "0.06em" }}>Attached files</div>
+              <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                {attachments.map((att, i) => (
+                  <div key={i} style={{ position: "relative", display: "flex", flexDirection: "column", alignItems: "center", gap: "4px" }}>
+                    {att.type.startsWith("image/")
+                      ? <img src={att.dataUrl} alt={att.name} style={{ width: "58px", height: "58px", objectFit: "cover", borderRadius: "8px", border: "1px solid #2d3748", display: "block" }} />
+                      : <div style={{ width: "58px", height: "58px", borderRadius: "8px", border: "1px solid #2d3748", background: "#1a1f2e", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "3px" }}>
+                          <span style={{ fontSize: "20px" }}>📄</span>
+                          <span style={{ fontSize: "8px", color: "#6366f1", fontWeight: "700" }}>{att.name.split(".").pop().toUpperCase()}</span>
+                        </div>
+                    }
+                    <span style={{ fontSize: "9px", color: "#64748b", maxWidth: "64px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", textAlign: "center" }}>{att.name}</span>
+                    <button onClick={() => setAttachments(prev => prev.filter((_, j) => j !== i))}
+                      style={{ position: "absolute", top: "-5px", right: "-5px", width: "16px", height: "16px", borderRadius: "50%", background: "#ef4444", border: "none", cursor: "pointer", color: "#fff", fontSize: "10px", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "800", lineHeight: 1 }}>
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 
@@ -330,7 +339,7 @@ export default function Dashboard() {
 
         {/* ── Right Preview Panel ── */}
         {showPreview && (
-          <div style={{ flex: "0 0 400px", width: "400px", minWidth: 0, borderLeft: "1px solid #1e2433", display: "flex", flexDirection: "column", overflow: "hidden", background: "#0a0d13" }}>
+          <div style={{ flex: 1, minWidth: "300px", borderLeft: "1px solid #1e2433", display: "flex", flexDirection: "column", overflow: "hidden", background: "#0a0d13" }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 14px", height: "44px", borderBottom: "1px solid #1e2433", flexShrink: 0 }}>
               <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "12px", fontWeight: "600", color: "#7a8a9a", letterSpacing: "0.02em" }}>
                 <div style={{ width: "7px", height: "7px", borderRadius: "50%", background: "#22c55e", boxShadow: "0 0 5px rgba(34,197,94,0.55)", flexShrink: 0 }} />
